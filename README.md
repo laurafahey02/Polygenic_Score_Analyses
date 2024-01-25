@@ -166,6 +166,17 @@ sed -i 's/snp/SNP/' aut_sumstats_cojo.tab
 
 
 ### For pathway-based analyses using [PRSet](https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1010624) 
+```bash
+# Filter concatenated bim file to contain only non-ambigous SNPs
+awk '!( ($5=="A" && $6=="T") || ($5=="T" && $6=="A") || ($5=="G" && $6=="C") || ($5=="C" && $6=="G") )' /home/lfahey/pathway_proj/ukb_checking/chrono_nodup_merged.bim > nonamb.bim
+
+# Further restric this bim file to contain only SNPs in summary statistics
+awk 'NR==FNR{a[$2];next} $2 in a {print $0}' PGC3_SCZ_wave3.primary.autosome.public.v3.vcf.tsv nonamb.bim > snps2keep.bim
+
+# Restrict sumstat file to contain only these SNPs too
+
+awk 'NR==FNR{a[$2];next} $2 in a {print $0}' nonamb.bim PGC3_SCZ_wave3.primary.autosome.public.v3.vcf.tsv > PGC3_SCZ_wave3.primary.autosome.public.v3.vcf.tsv
+```
 
 # Runnning SBayesRC
 Example for autsim.
@@ -180,6 +191,23 @@ Rscript -e "SBayesRC::impute(mafile='aut_tidy.ma', LDdir='../ukbEUR_Imputed', ou
 
 Rscript -e "SBayesRC::sbayesrc(mafile='aut_imp.ma', LDdir='../ukbEUR_Imputed', outPrefix='aut_tidy_sbrc', annot='../annot_baseline2.2.txt', log2file=TRUE)"
 ```
+The output of above is a list of SNPs with their adjusted effect size. Polygenic scores than then be created using the --score command in Plink:
+
+```bash
+pgs_scores="plink --bfile chrono_nodup_merged \
+                 --score bp_sbrc.scores \
+                 --threads 16 \
+                 --out bp_chronotypePRS" 
+
+dx run swiss-army-knife \
+      -iin="project-GP8V3yjJXgZZ9vbKBFz74V2Q:/genotype_qc/chrono_nodup_merged.bed" \
+      -iin="project-GP8V3yjJXgZZ9vbKBFz74V2Q:/genotype_qc/chrono_nodup_merged.bim" \
+      -iin="project-GP8V3yjJXgZZ9vbKBFz74V2Q:/genotype_qc/chrono_nodup_merged.fam" \
+      -iin="project-GP8V3yjJXgZZ9vbKBFz74V2Q:/genotype_qc/prs_files/bp_sbrc.scores" \
+      -icmd="${pgs_scores}" \
+      --instance-type="mem3_ssd2_v2_x16" # Set node I want to use
+```
+
 ## Running PRSet
 PRSet was run from the DNAnexus command line, using the app, prset_rsamples_ncovar, which was modified from the app, PRSice-2, already available on UKB RAP. To build this app on UKB RAP, upload the folder provided on this page to the RAP, and run dx build from within it.
 
