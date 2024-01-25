@@ -139,10 +139,47 @@ sort samples_icd10_bp.txt | uniq > samples_bp.txt
 
 ## Preparation of discovery data
 ### For genome-wide analyses using [SBayesRC](https://www.biorxiv.org/content/10.1101/2022.10.12.510418v1)
+Get summary statistic data into COJO format. Example below is for autism summary statistics, but similar editing was performed for all GWAS summary statistics.
+In bash:
+```bash
+# Print relevant columns to new file
+awk '{print $2 "\t" $4 "\t" $5 "\t" $6 "\t" $7 "\t" $9 "\t" $10 "\t" $11 "\t" $17 "\t" $18}' daner_iPSYCH-DBS_Aut_PGC1_Eur_ph3 > aut_sumstats.tab
+```
+Read file into R:
+```R
+sumstats <- read.table("aut_sumstats.tab", header=T, sep="\t")
+# get the average frequency of allele 1 across cases and controls
+sumstats$freq <- (sumstats$FRQ_A_18381 + sumstats$FRQ_U_27969) / 2
+# Get total sample size (cases and controls)
+sumstats$N <- sumstats$Nco + sumstats$Nca
+# subset dataframe
+AUT_sumstats <- sumstats[,c("SNP", "A1", "A2", "freq", "OR", "SE", "P", "N")]
+write.table(AUT_sumstats, "aut_sumstats.ma", row.names=F, col.names=T, quote=F, sep="\t")
+```
+Further edit in bash to label columns as required:
+```bash
+sed -i 's/OR/b/' aut_sumstats_cojo.tab
+sed -i 's/SE/se/' aut_sumstats_cojo.tab
+sed -i 's/P/p/' aut_sumstats_cojo.tab
+sed -i 's/snp/SNP/' aut_sumstats_cojo.tab
+```
 
 
 ### For pathway-based analyses using [PRSet](https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1010624) 
 
+# Runnning SBayesRC
+Example for autsim.
+```bash
+# Tidy
+Rscript -e "SBayesRC::tidy(mafile='../sumstats/aut_cojo_beta.tab', LDdir='../ukbEUR_Imputed', output='aut_tidy.ma', log2file=TRUE)"
+
+# Impute
+Rscript -e "SBayesRC::impute(mafile='aut_tidy.ma', LDdir='../ukbEUR_Imputed', output='aut_imp.ma', log2file=TRUE)" 
+
+# Run model
+
+Rscript -e "SBayesRC::sbayesrc(mafile='aut_imp.ma', LDdir='../ukbEUR_Imputed', outPrefix='aut_tidy_sbrc', annot='../annot_baseline2.2.txt', log2file=TRUE)"
+```
 ## Running PRSet
 PRSet was run from the DNAnexus command line, using the app, prset_rsamples_ncovar, which was modified from the app, PRSice-2, already available on UKB RAP. To build this app on UKB RAP, upload the folder provided on this page to the RAP, and run dx build from within it.
 
@@ -151,6 +188,49 @@ Below is an example of running PRSet, using chronotype as the target data and bi
 ```bash
 dx run project-GP8V3yjJXgZZ9vbKBFz74V2Q:/my_apps/prset_rsamples_ncovar --instance-type mem3_ssd1_v2_x32 -ibase_assoc="project-GP8V3yjJXgZZ9vbKBFz74V2Q:/prset/input_files/bp_files/daner_bip_pgc3_nm_noukbiobank.filt0.5.assoc" -iplink_bed="project-GP8V3yjJXgZZ9vbKBFz74V2Q:/genotype_qc/chrono_merged_filt.bed" -iplink_bim="project-GP8V3yjJXgZZ9vbKBFz74V2Q:/genotype_qc/chrono_merged_filt.bim" -iplink_fam="project-GP8V3yjJXgZZ9vbKBFz74V2Q:/genotype_qc/chrono_merged_filt.fam" -igtf="project-GP8V3yjJXgZZ9vbKBFz74V2Q:/prset/input_files/Homo_sapiens.GRCh37.87.gtf" -imsigdb="project-GP8V3yjJXgZZ9vbKBFz74V2Q:/prset/input_files/pathways502500.txt" -iextract_snps="project-GP8V3yjJXgZZ9vbKBFz74V2Q:/prset/input_files/bp_files/snps2keep_filt0.5.bim" -iremove_samples="project-GP8V3yjJXgZZ9vbKBFz74V2Q:/prset/input_files/scz_files/samples_bp.txt" -iextra_options="--wind-3 10k --wind-5 35k --proxy 0.8 --A1 A1 --A2 A2 --pvalue P --clump-r2 0.2 --stat OR --snp SNP --base-info INFO:0.7 --set-perm 5000" --priority low
 ```
+## Getting performance metrics
+### Getting SbayesRC results in R
+The example below is for getting performance metrics for a genome-wide BP polygenic score, created using SBayesRC, in predicting chronotype. However, all performence metrics, including those for polygenic scores created using PRSet were calculated slimilarly.
 
+```R
+# 1. Read in libraries
+library(dplyr)
+library(confintr)
 
+# 2. Read in pgs score file (output of PRSet/PRSice/SBayesRC) and covariate file
 
+bp_scores <- read.table("bp_chronotypePRS.profile", header=T)
+covar <- read.table("/home/lfahey/ukb/covar_all.samples", header=T, fill=T)
+
+# Covert to factors
+bp_scores$IID <- as.factor(bp_scores$IID)
+covar$IID <- as.factor(covar$IID)
+covar$SEX <- as.factor(covar$SEX)
+covar$CENTRE <- as.factor(covar$CENTRE)
+covar$BATCH <- as.factor(covar$BATCH)
+# include pheno for insomnia
+
+# 3. Merge the two dataframes
+bp_scores_covar <- merge(bp_scores, covar, by = "IID", all.x = FALSE)
+# subset
+bp_scores_covar <- bp_scores_covar[,c("IID", "PHENO", "SCORE", "AGE", "SEX", "CENTRE", "BATCH", "PC1", "PC2", "PC3", "PC4", "PC5", "PC6", "PC7", "PC8", "PC9", "PC10")]
+
+# covar_rescale <- mutate_if(covar, is.numeric, list(~as.numeric(scale(.))))
+
+# Run a linear regression with chronotype as the dependent variable and the confounders as the independent variables
+linear_covar <- lm(PHENO ~ SEX + BATCH + CENTRE + PC1 + PC2 + PC3 + PC4 + PC5 + PC6 + PC7 + PC8 + PC9 + PC10 + AGE, data=bp_scores_covar)
+
+summary(logistic_covar)
+
+# assign residuals as the corrected phenoytpe
+bp_scores_covar$cor_pheno <- resid(linear_covar)
+
+# Run a linear regression with the corrected phenotype as the dependent variable and the PGS as the independent variable
+bp_pgs_cor <- lm(cor_pheno ~ SCORE, data = bp_scores_covar)
+
+# Get P valaue and R2
+summary(bp_pgs_cor)
+
+# Get CIs of R2
+ci_rsquared(bp_pgs_cor)
+```
