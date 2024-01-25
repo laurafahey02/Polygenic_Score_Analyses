@@ -218,7 +218,7 @@ dx run project-GP8V3yjJXgZZ9vbKBFz74V2Q:/my_apps/prset_rsamples_ncovar --instanc
 ```
 ## Getting performance metrics
 ### Getting SbayesRC results in R
-The example below is for getting performance metrics for a genome-wide BP polygenic score, created using SBayesRC, in predicting chronotype. However, all performence metrics, including those for polygenic scores created using PRSet were calculated slimilarly.
+An example below of how performance metrics were obtained for a genome-wide BP polygenic score, created using SBayesRC, in predicting chronotype is provided in performance_metrics.R. However, all performence metrics, including those for polygenic scores created using PRSet were calculated slimilarly.
 
 ```R
 # 1. Read in libraries
