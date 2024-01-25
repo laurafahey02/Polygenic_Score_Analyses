@@ -1,5 +1,5 @@
 #!/bin/bash
-# PRSice2 0.0.1
+# PRSet
 
 set -e -x -o pipefail
 
