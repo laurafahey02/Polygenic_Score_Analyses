@@ -19,7 +19,25 @@ Create a list of SNPs to be excluded based on imputation quality score (INFO) < 
 This was done using R in jupyter notebooks on UKB RAP as detailed here: CreateListSNPsPassImpINFO.ipynb
 
 #### Step 3: Run Plink on genotype files to exclude SNPs and samples that do not pass quality checks
-Bash command
+The following code was run from the UKB RAP command line interface.
+```bash
+for chr in {1..22}; do
+   plink_qc="plink2 --bgen project-GP8V3yjJXgZZ9vbKBFz74V2Q:/Bulk/Imputation/UKB imputation from genotype/ukb22828_c${chr}_b0_v3 \
+                    --sample project-GP8V3yjJXgZZ9vbKBFz74V2Q:/Bulk/Imputation/UKB imputation from genotype/ukb22828_c${chr}_b0_v3
+                    --extract snpsPassInfo_0.7_${chr}.txt \
+                    --remove ids_to_exclude.txt \
+                    --geno 0.02 --maf 0.005 --hwe 1*10-6 \
+                    --make-bed --out ${chr}_qcd" 
+
+   dx run swiss-army-knife \
+      -iin="project-GP8V3yjJXgZZ9vbKBFz74V2Q:/Bulk/Imputation/UKB imputation from genotype/ukb22828_c${chr}_b0_v3.bgen" \
+      -iin="project-GP8V3yjJXgZZ9vbKBFz74V2Q:/Bulk/Imputation/UKB imputation from genotype/ukb22828_c${chr}_b0_v3.sample" \
+      -iin="project-GP8V3yjJXgZZ9vbKBFz74V2Q:/genotype_qc/snpsPassInfo_0.7_${chr}.txt \
+      -iin="project-GP8V3yjJXgZZ9vbKBFz74V2Q:/genotype_qc/ids_to_exclude.txt \
+      -icmd"${plink_qc}" \
+      --instance-type="mem3_ssd2_v2_x16" # Set node I want to use
+done
+```
 
 ## Preparation of discovery data
 ### For genome-wide analyses using [SBayesRC](https://www.biorxiv.org/content/10.1101/2022.10.12.510418v1)
