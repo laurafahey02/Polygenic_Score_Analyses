@@ -144,7 +144,7 @@ sort samples_icd10_bp.txt | uniq > samples_bp.txt
 ### For pathway-based analyses using [PRSet](https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1010624) 
 
 ## Running PRSet
-PRSet was run from the DNAnexus command line, using the app, prset_rsamples_ncovar, which was modified from the app, PRSice, already available on UKB RAP. 
+PRSet was run from the DNAnexus command line, using the app, prset_rsamples_ncovar, which was modified from the app, PRSice-2, already available on UKB RAP. To build this app on UKB RAP, upload the folder provided on this page to the RAP, and run dx build from within it.
 
 Below is an example of running PRSet, using chronotype as the target data and bipolar summary statistics as the discovery data.
 
