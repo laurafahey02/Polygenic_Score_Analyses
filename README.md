@@ -216,6 +216,8 @@ Below is an example of running PRSet, using chronotype as the target data and bi
 ```bash
 dx run project-GP8V3yjJXgZZ9vbKBFz74V2Q:/my_apps/prset_rsamples_ncovar --instance-type mem3_ssd1_v2_x32 -ibase_assoc="project-GP8V3yjJXgZZ9vbKBFz74V2Q:/prset/input_files/bp_files/daner_bip_pgc3_nm_noukbiobank.filt0.5.assoc" -iplink_bed="project-GP8V3yjJXgZZ9vbKBFz74V2Q:/genotype_qc/chrono_merged_filt.bed" -iplink_bim="project-GP8V3yjJXgZZ9vbKBFz74V2Q:/genotype_qc/chrono_merged_filt.bim" -iplink_fam="project-GP8V3yjJXgZZ9vbKBFz74V2Q:/genotype_qc/chrono_merged_filt.fam" -igtf="project-GP8V3yjJXgZZ9vbKBFz74V2Q:/prset/input_files/Homo_sapiens.GRCh37.87.gtf" -imsigdb="project-GP8V3yjJXgZZ9vbKBFz74V2Q:/prset/input_files/pathways502500.txt" -iextract_snps="project-GP8V3yjJXgZZ9vbKBFz74V2Q:/prset/input_files/bp_files/snps2keep_filt0.5.bim" -iremove_samples="project-GP8V3yjJXgZZ9vbKBFz74V2Q:/prset/input_files/scz_files/samples_bp.txt" -iextra_options="--wind-3 10k --wind-5 35k --proxy 0.8 --A1 A1 --A2 A2 --pvalue P --clump-r2 0.2 --stat OR --snp SNP --base-info INFO:0.7 --set-perm 5000" --priority low
 ```
-## Getting performance metrics
+## Performance metrics and visualisations
 ### Getting SbayesRC results in R
-An example below of how performance metrics were obtained for a genome-wide BP polygenic score, created using SBayesRC, in predicting chronotype is provided in performance_metrics.R. However, all performence metrics, including those for polygenic scores created using PRSet were calculated slimilarly.
+An example of how performance metrics were obtained for a genome-wide BP polygenic score, created using SBayesRC, in predicting chronotype is provided in performance_metrics.R. However, all performence metrics, including those for polygenic scores created using PRSet were calculated slimilarly.
+
+RStudio was used to create plots. Code used to create the heaptmap in Figure 3 of the manuscript is provided in Create_heatmap.R, code used to create the barplots in Figure 2 is provided in Create_barplots.R.
