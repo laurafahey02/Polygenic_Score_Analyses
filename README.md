@@ -13,9 +13,10 @@ Participants are furthermore removed based on relatedness using the UKB supplied
 
 This was done using Python in jupyter notebooks on UKB RAP as detailed here: create_list_samples_to_remove.ipynb
 
-#### Step 2: Create list SNPs pass the imputation information threshold
-Create a list of SNPs to be excluded based on imputation quality score (INFO) < 0.7.
+#### Step 2: SNP QC
+SNPs were excluded based on the following criteria: imputation quality score (INFO) < 0.7, proportion of missing genotypes > 0.02, minor allele frequency (MAF) < 0.005, Hardy–Weinberg equilibrium (HWE) < 1×10-6. Duplicate SNPs were removed using Plink2 with the flag “--rm-dup force-first”. Plink2 binary file-sets were created using the “--make-bed” flag and chromosome specific files were merged using the Plink2 “--merge-list” flag. Finally, ambiguous SNPs and SNPs not present in the corresponding neuropsychiatric GWAS were removed.
 
+##### Step 2.1: Create a list of SNPs that pass the imputation information threshold
 This was done using R in jupyter notebooks on UKB RAP as detailed here: CreateListSNPsPassImpINFO.ipynb
 
 #### Step 3: Run Plink on genotype files to exclude SNPs and samples that do not pass quality checks
@@ -121,6 +122,8 @@ dx run swiss-army-knife \
       --instance-type="mem2_ssd2_v2_x32" # Set node I want to use
 ```
 #### Step 5: Create lists of samples with schizophrenia and bipolar to be removed for the sczizophrenia and bipolar polygeinc score analyses, respectively.
+To minimize any potential overlap between UKB and PGC SCZ and BP cohorts, participants who had received SCZ or BP diagnoses were excluded from the construction of the SCZ PGS or BP PGS, respectively. Such samples were identified through self-reported diagnoses (data-field: 20544) and linked health records reporting international classification of disease (ICD10) codes, F200-F209 for SCZ and F310-F319 for BP (data-field: 41270). This resulted in a further removal of 1,223 SCZ samples and 1,866 BP samples, in the construction of the SCZ and BP PGSs, respectively.
+
 ```bash
 ### samples with scz
 
