@@ -153,15 +153,16 @@ Read file into R:
 sumstats <- read.table("aut_sumstats.tab", header=T, sep="\t")
 # get the average frequency of allele 1 across cases and controls
 sumstats$freq <- (sumstats$FRQ_A_18381 + sumstats$FRQ_U_27969) / 2
+# Convert odds ratio to beta
+sumstats$b <- log(sumstats$OR)
 # Get total sample size (cases and controls)
 sumstats$N <- sumstats$Nco + sumstats$Nca
 # subset dataframe
-AUT_sumstats <- sumstats[,c("SNP", "A1", "A2", "freq", "OR", "SE", "P", "N")]
+AUT_sumstats <- sumstats[,c("SNP", "A1", "A2", "freq", "b", "SE", "P", "N")]
 write.table(AUT_sumstats, "aut_sumstats.ma", row.names=F, col.names=T, quote=F, sep="\t")
 ```
 Further edit in bash to label columns as required:
 ```bash
-sed -i 's/OR/b/' aut_sumstats_cojo.tab
 sed -i 's/SE/se/' aut_sumstats_cojo.tab
 sed -i 's/P/p/' aut_sumstats_cojo.tab
 sed -i 's/snp/SNP/' aut_sumstats_cojo.tab
