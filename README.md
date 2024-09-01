@@ -194,6 +194,10 @@ Rscript -e "SBayesRC::impute(mafile='aut_tidy.ma', LDdir='../ukbEUR_Imputed', ou
 # Run model
 
 Rscript -e "SBayesRC::sbayesrc(mafile='aut_imp.ma', LDdir='../ukbEUR_Imputed', outPrefix='aut_tidy_sbrc', annot='../annot_baseline2.2.txt', log2file=TRUE)"
+
+# Process output file
+awk '{print $1 "\t" $2 "\t" $3}' aut_tidy_sbrc.txt | sed "1d" > aut_sbrc.scores
+
 ```
 The output of above is a list of SNPs with their adjusted effect size. Polygenic scores than then be created using the --score command in Plink:
 
