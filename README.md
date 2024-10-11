@@ -121,24 +121,6 @@ dx run swiss-army-knife \
       -icmd="${merge}" \
       --instance-type="mem2_ssd2_v2_x32" # Set node I want to use
 ```
-#### Step 5: Create lists of samples with schizophrenia and bipolar to be removed for the sczizophrenia and bipolar polygeinc score analyses, respectively.
-To minimize any potential overlap between UKB and PGC SCZ and BP cohorts, participants who had received SCZ or BP diagnoses were excluded from the construction of the SCZ PGS or BP PGS, respectively. Such samples were identified through self-reported diagnoses (data-field: 20544) and linked health records reporting international classification of disease (ICD10) codes, F200-F209 for SCZ and F310-F319 for BP (data-field: 41270). This resulted in a further removal of 1,223 SCZ samples and 1,866 BP samples, in the construction of the SCZ and BP PGSs, respectively.
-
-```bash
-### samples with scz
-
-grep "F20" icd10_diagnoses_participant.tsv | awk '{print $1}' > samples_icd10_scz.txt
-
-awk '$2 == 2 || $3 == 2 || $4 == 2 || $5 == 2 || $6 == 2 || $7 == 2 || $8 == 2 || $9 == 2 || $10 == 2 || $11 == 2 || $12 == 2 || $13 == 2 || $14 == 2 {print $1}' MentalHealthDiagnosedProfessional.tsv >> samples_icd10_scz.txt
-
-sort samples_icd10_scz.txt | uniq > samples_scz.txt # These are the samples I want to remove
-
-### samples with bp
-
-rep -E "F31" icd10_diagnoses_participant.tsv | awk '{print $1}' > samples_icd10_bp.txt
-awk '$2 == 10 || $3 == 10 || $4 == 10 || $5 == 10 || $6 == 10 || $7 == 10 || $8 == 10 || $9 == 10 || $10 == 10 || $11 == 10 || $12 == 10 || $13 == 10 || $14 == 10' MentalHealthDiagnosedProfessional.tsv | awk '{prink $1}' >> samples_icd10_bp.txt
-sort samples_icd10_bp.txt | uniq > samples_bp.txt
-```
 
 ## Preparation of discovery data
 ### For genome-wide analyses using [SBayesRC](https://www.biorxiv.org/content/10.1101/2022.10.12.510418v1)
